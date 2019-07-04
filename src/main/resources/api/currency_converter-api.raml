@@ -1,0 +1,36 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/adff8f6e-43ec-416b-a5b6-d63f3b5d6258/ # 
+title: Currency_converter API
+
+traits:
+  common_errors: !include traits/responses.raml
+  
+
+/latest:
+ description: Returns real-time exchange rate data for all available or a specific set of currencies in the standard JSON format.
+
+ get:
+    responses:
+      200:
+        body:
+          application/json:
+           example:
+             !include responses/latest.json
+    is: [common_errors]                
+            
+/historical:
+ description: This will return historical exchange rate data for all available or a specific set of currencies for a given date back to the year of 1999 and the date format should be YYYY-MM-DD.
+ 
+ get:
+  responses:
+     200:
+       body:
+         application/json:
+           example:
+             !include responses/historical.json           
+  is: [common_errors]
+               
+  
+     
+
+

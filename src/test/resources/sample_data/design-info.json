@@ -1,0 +1,17 @@
+{
+  "sampleData": {
+    "1a5d5f41-eae2-472c-ac06-0e62ac0a9421": {
+      "payload": "sample_data/unknown.dwl"
+    },
+    "43aa906f-e4cc-4ab2-88d4-8b059ffd8d19": {
+      "payload": "sample_data/unknown_1.dwl"
+    },
+    "c3f015a7-fdf8-4c2c-8941-b8fa76c1d760": {
+      "payload": "sample_data/unknown_2.dwl"
+    },
+    "1a6a9d37-3dc6-4456-92cd-15340f232a35": {},
+    "3217855a-9dbf-4298-b836-b2deda81e722": {
+      "payload": "sample_data/unknown_4.dwl"
+    }
+  }
+}
