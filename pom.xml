@@ -25,6 +25,14 @@
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
+				 <cloudHubDeployment>
+                   <uri>https://anypoint.mulesoft.com</uri>
+                   <muleVersion>4.2.0</muleVersion>
+                   <username>swathi999</username>
+                   <password>Password@123</password>
+                   <applicationName>currency_converter_app</applicationName>
+                   <environment>Sandbox</environment>
+                </cloudHubDeployment>
 				</configuration>
 			</plugin>
 		</plugins>
