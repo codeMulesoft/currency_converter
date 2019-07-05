@@ -41,9 +41,10 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 	<flow name="currency_converter_historicalflow" doc:id="d5fb8f44-3bc5-4485-a0a7-23c94f8c5497" >
 		<set-variable value="#[attributes.queryParams.Date_string]" doc:name="Set Variable" doc:id="74dbb892-f1a3-4c11-9ca4-5b879aafb7d0" variableName="Date_string"/>
 		<validation:is-not-null doc:name="Is not null" doc:id="49134517-9b85-481a-8aeb-d4c4ebc64fb5" config-ref="Validation_Config" message="Invalid date format" value="#[payload]"/>
-		<os:contains doc:name="Contains" doc:id="3cffd39d-0550-4a41-9f8d-37eff7eb0177" key="#[vars.Date_string]" objectStore="Object_store"/>
-		<choice doc:name="Choice" doc:id="888121f4-38a1-4b03-ae83-8e0695956b69" >
-			<when expression="#[payload == false]">
+		<os:retrieve doc:name="Retrieve" doc:id="479865ff-ff40-427e-a8ae-f6ddf4eae695" key="#[vars.Date_string]" objectStore="Object_store" />
+		<logger level="DEBUG" doc:name="Logger" doc:id="d4037461-70fd-4ff6-b215-fe33a5e2f3be" message="#[payload]"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="13f0192b-3012-40fb-8c8f-6649262006ec" type="OS:KEY_NOT_FOUND">
 				<http:request method="GET" doc:name="Request" doc:id="b3f919ca-7ee4-42d4-806d-16888db6d109" config-ref="HTTP_Request_configuration" path="/api/{date}">
 			<http:uri-params><![CDATA[#[output application/java
 ---
@@ -60,16 +61,13 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 					<ee:message>
 						<ee:set-payload resource="dataweave/dataweave.dwl" />
 					</ee:message>
-					<ee:variables >
+					<ee:variables>
 						<ee:set-variable resource="dataweave/dataweave.dwl" variableName="data" />
 					</ee:variables>
 				</ee:transform>
-				<os:store doc:name="Store" doc:id="e1ba4947-82e8-4486-995f-e628fae3c55b" key="#[vars.Date_string]" objectStore="Object_store"/>
-			</when>
-			<otherwise >
-				<os:retrieve doc:name="Retrieve" doc:id="479865ff-ff40-427e-a8ae-f6ddf4eae695" key="#[vars.Date_string]" objectStore="Object_store"/>
-			</otherwise>
-		</choice>
-		<logger level="DEBUG" doc:name="Logger" doc:id="32b1eebd-7514-4de9-8ffb-54e5ba95c525" message="#[payload]"/>
+				<os:store doc:name="Store" doc:id="e1ba4947-82e8-4486-995f-e628fae3c55b" key="#[vars.Date_string]" objectStore="Object_store" />
+				<logger level="DEBUG" doc:name="Logger" doc:id="d7a6c63c-3990-405e-8ae6-4e6aafba2484" message="#[payload]"/>
+			</on-error-continue>
+		</error-handler>
 	</flow>
 </mule>
