@@ -35,11 +35,11 @@
 				<configuration>
 				 <cloudHubDeployment>
                    <uri>https://anypoint.mulesoft.com</uri>
-                   <muleVersion>4.2.0</muleVersion>
-                   <username>swathi999</username>
-                   <password>Password@123</password>
-                   <applicationName>currency-app</applicationName>
-                   <environment>Sandbox</environment>
+                   <muleVersion>${app.runtime}</muleVersion>
+                   <username>${username}</username>
+                   <password>${password}</password>
+                   <applicationName>${cloudhub.application.name}</applicationName>
+                   <environment>${environment}</environment>
                 </cloudHubDeployment>
 				</configuration>
 			</plugin>
