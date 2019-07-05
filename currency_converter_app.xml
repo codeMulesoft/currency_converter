@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="35baee9b-a876-4483-9d9d-6719471364d3" >
+		<http:request-connection host="${host}" port="${port}" />
+	</http:request-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="632359af-029d-476c-95bf-a12893ea1878" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="b785ff5a-f7a0-4214-947d-a8566798579d" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="a0e6e5fb-1b86-41c7-8956-8820a9495cff" file="dev.properties" key="1234" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="452881a6-3d7c-4551-a454-0a286e83c9f9" file="dev.properties" />
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="4acc7d94-8501-41a4-83f3-3edfd9b83f1d" />
+	<flow name="currency_converter_latestflow" doc:id="0a462d09-8664-4939-91a6-32d66482ec71" >
+		<http:request method="GET" doc:name="Request" doc:id="2f62ab85-0e9d-4962-803b-e9b8fd500429" config-ref="HTTP_Request_configuration" path="/api/latest">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"access_key" : "${secure::access_key}"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="f5ed5068-7f42-4c9d-af00-3371da08bc86" >
+			<ee:message >
+				<ee:set-payload resource="dataweave/dataweave.dwl" />
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable resource="dataweave/dataweave.dwl" variableName="data" />
+			</ee:variables>
+		</ee:transform>
+		<logger level="DEBUG" doc:name="Logger" doc:id="a03df082-1508-477c-91f9-6e9738be550f" message="#[payload]"/>
+	</flow>
+	<flow name="currency_converter_historicalflow" doc:id="d5fb8f44-3bc5-4485-a0a7-23c94f8c5497" >
+		<set-variable value="#[attributes.queryParams.Date_string]" doc:name="Set Variable" doc:id="74dbb892-f1a3-4c11-9ca4-5b879aafb7d0" variableName="Date_string"/>
+		<validation:is-not-null doc:name="Is not null" doc:id="49134517-9b85-481a-8aeb-d4c4ebc64fb5" config-ref="Validation_Config" message="Invalid date format" value="#[payload]"/>
+		<os:retrieve doc:name="Retrieve" doc:id="479865ff-ff40-427e-a8ae-f6ddf4eae695" key="#[vars.Date_string]" objectStore="Object_store" />
+		<logger level="DEBUG" doc:name="Logger" doc:id="d4037461-70fd-4ff6-b215-fe33a5e2f3be" message="#[payload]"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="13f0192b-3012-40fb-8c8f-6649262006ec" type="OS:KEY_NOT_FOUND">
+				<http:request method="GET" doc:name="Request" doc:id="b3f919ca-7ee4-42d4-806d-16888db6d109" config-ref="HTTP_Request_configuration" path="/api/{date}">
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"date" : vars.Date_string
+}]]]></http:uri-params>
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	"access_key" : "${secure::access_key}"
+}]]]></http:query-params>
+		</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="ac0a677e-5f4e-4aa9-8944-708fbd1ece54">
+					<ee:message>
+						<ee:set-payload resource="dataweave/dataweave.dwl" />
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable resource="dataweave/dataweave.dwl" variableName="data" />
+					</ee:variables>
+				</ee:transform>
+				<os:store doc:name="Store" doc:id="e1ba4947-82e8-4486-995f-e628fae3c55b" key="#[vars.Date_string]" objectStore="Object_store" />
+				<logger level="DEBUG" doc:name="Logger" doc:id="d7a6c63c-3990-405e-8ae6-4e6aafba2484" message="#[payload]"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>
