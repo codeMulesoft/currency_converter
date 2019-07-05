@@ -38,7 +38,7 @@
                    <muleVersion>4.2.0</muleVersion>
                    <username>swathi999</username>
                    <password>Password@123</password>
-                   <applicationName>currency_app</applicationName>
+                   <applicationName>currency-app</applicationName>
                    <environment>Sandbox</environment>
                 </cloudHubDeployment>
 				</configuration>
